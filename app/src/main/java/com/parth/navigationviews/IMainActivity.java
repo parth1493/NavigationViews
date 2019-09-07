@@ -1,6 +1,7 @@
 package com.parth.navigationviews;
 
 
+import com.parth.navigationviews.models.Message;
 import com.parth.navigationviews.models.User;
 
 /**
@@ -10,4 +11,5 @@ import com.parth.navigationviews.models.User;
 public interface IMainActivity {
 
     void inflateViewProfileFragment(User user);
+    void onMessageSelected(Message message);
 }
