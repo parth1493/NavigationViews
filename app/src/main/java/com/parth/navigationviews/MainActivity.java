@@ -4,19 +4,26 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.ittianyu.bottomnavigationviewex.BottomNavigationViewEx;
 import com.parth.navigationviews.models.Message;
 import com.parth.navigationviews.models.User;
+import com.parth.navigationviews.settings.SettingsFragment;
 import com.parth.navigationviews.utils.PreferenceKeys;
 
-public class MainActivity extends AppCompatActivity implements IMainActivity, BottomNavigationViewEx.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements IMainActivity, BottomNavigationViewEx.OnNavigationItemSelectedListener,NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -26,6 +33,31 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, Bo
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
 
+
+            case R.id.home: {
+                init();
+                break;
+            }
+
+            case R.id.settings: {
+                Log.d(TAG, "onNavigationItemSelected: Settings.");
+                SettingsFragment settingsFragment = new SettingsFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.main_content_frame, settingsFragment, getString(R.string.tag_fragment_settings));
+                transaction.addToBackStack(getString(R.string.tag_fragment_settings));
+                transaction.commit();
+                break;
+            }
+
+            case R.id.agreement: {
+                Log.d(TAG, "onNavigationItemSelected: Agreement.");
+                AgreementFragment homeFragment = new AgreementFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.main_content_frame, homeFragment, getString(R.string.tag_fragment_agreement));
+                transaction.addToBackStack(getString(R.string.tag_fragment_agreement));
+                transaction.commit();
+                break;
+            }
 
             case R.id.bottom_nav_home: {
                 Log.d(TAG, "onNavigationItemSelected: HomeFragment.");
@@ -40,9 +72,9 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, Bo
 
             case R.id.bottom_nav_connections: {
                 Log.d(TAG, "onNavigationItemSelected: ConnectionsFragment.");
-                SavedConnectionsFragment savedConnectionsFragment = new SavedConnectionsFragment();
+                SavedConnectionsFragment homeFragment = new SavedConnectionsFragment();
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.main_content_frame, savedConnectionsFragment, getString(R.string.tag_fragment_saved_connections));
+                transaction.replace(R.id.main_content_frame, homeFragment, getString(R.string.tag_fragment_saved_connections));
                 transaction.addToBackStack(getString(R.string.tag_fragment_saved_connections));
                 transaction.commit();
                 item.setChecked(true);
@@ -51,21 +83,24 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, Bo
 
             case R.id.bottom_nav_messages: {
                 Log.d(TAG, "onNavigationItemSelected: MessagesFragment.");
-                MessagesFragment messagesFragment = new MessagesFragment();
+                MessagesFragment homeFragment = new MessagesFragment();
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.main_content_frame, messagesFragment, getString(R.string.tag_fragment_messages));
+                transaction.replace(R.id.main_content_frame, homeFragment, getString(R.string.tag_fragment_messages));
                 transaction.addToBackStack(getString(R.string.tag_fragment_messages));
                 transaction.commit();
                 item.setChecked(true);
                 break;
             }
         }
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return false;
     }
 
 
     //widgets
     private BottomNavigationViewEx mBottomNavigationViewEx;
+    private ImageView mHeaderImage;
+    private DrawerLayout mDrawerLayout;
 
     //vars
 
@@ -75,18 +110,39 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, Bo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mBottomNavigationViewEx = findViewById(R.id.bottom_nav_view);
+        NavigationView navigationView = findViewById(R.id.navigation_view);
+        View headerView = navigationView.getHeaderView(0);
+        mHeaderImage = headerView.findViewById(R.id.header_image);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
 
         isFirstLogin();
+        setHeaderImage();
         initBottomNavigationView();
+        setNavigationViewListener();
         init();
     }
 
-    private void init(){
+    private void init() {
         HomeFragment homeFragment = new HomeFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.main_content_frame, homeFragment, getString(R.string.tag_fragment_home));
         transaction.addToBackStack(getString(R.string.tag_fragment_home));
         transaction.commit();
+    }
+
+    private void setHeaderImage() {
+        Log.d(TAG, "setHeaderImage: setting header image for navigation drawer.");
+
+        // better to set the header with glide. It's more efficient than setting the source directly
+        Glide.with(this)
+                .load(R.drawable.couple)
+                .into(mHeaderImage);
+    }
+
+    private void setNavigationViewListener() {
+        Log.d(TAG, "setNavigationViewListener: initializing navigation drawer onclicklistener.");
+        NavigationView navigationView = findViewById(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     private void initBottomNavigationView() {
@@ -154,6 +210,5 @@ public class MainActivity extends AppCompatActivity implements IMainActivity, Bo
         transaction.addToBackStack(getString(R.string.tag_fragment_chat));
         transaction.commit();
     }
-
 
 }
